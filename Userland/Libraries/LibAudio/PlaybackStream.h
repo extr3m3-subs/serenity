@@ -23,6 +23,32 @@ enum class OutputState {
     Suspended,
 };
 
+enum class AudioEffect {
+    None,
+    Reverb,
+    Echo,
+    Chorus,
+    Distortion,
+    LowPass,
+    HighPass,
+    BandPass
+};
+
+struct AudioPosition {
+    float x { 0.0f };
+    float y { 0.0f };
+    float z { 0.0f };
+};
+
+struct AudioProperties {
+    float volume { 1.0f };
+    float pan { 0.0f };
+    AudioPosition position;
+    AudioEffect effect { AudioEffect::None };
+    float effect_strength { 0.0f };
+    u8 priority { 0 };
+};
+
 // This class implements high-level audio playback behavior. It is primarily intended as an abstract cross-platform
 // interface to be used by Ladybird (and its dependent libraries) for playback.
 //
@@ -31,6 +57,7 @@ enum class OutputState {
 class PlaybackStream : public AtomicRefCounted<PlaybackStream> {
 public:
     using AudioDataRequestCallback = Function<ReadonlyBytes(Bytes buffer, PcmSampleFormat format, size_t sample_count)>;
+    using AudioEffectCallback = Function<void(Bytes buffer, PcmSampleFormat format, size_t sample_count, AudioEffect effect, float strength)>;
 
     // Creates a new audio Output class.
     //
@@ -67,6 +94,33 @@ public:
     virtual ErrorOr<Duration> total_time_played() = 0;
 
     virtual NonnullRefPtr<Core::ThreadedPromise<void>> set_volume(double volume) = 0;
+
+    // Enhanced audio positioning and effects
+    virtual NonnullRefPtr<Core::ThreadedPromise<void>> set_audio_properties(AudioProperties const&) = 0;
+    virtual NonnullRefPtr<Core::ThreadedPromise<void>> set_position(AudioPosition const&) = 0;
+    virtual NonnullRefPtr<Core::ThreadedPromise<void>> set_effect(AudioEffect, float strength) = 0;
+    
+    // Audio streaming support
+    virtual NonnullRefPtr<Core::ThreadedPromise<void>> stream_data(ReadonlyBytes, bool is_last_chunk) = 0;
+    virtual NonnullRefPtr<Core::ThreadedPromise<void>> clear_stream() = 0;
+    
+    // Audio prioritization
+    virtual NonnullRefPtr<Core::ThreadedPromise<void>> set_priority(u8 priority) = 0;
+    virtual u8 get_priority() const = 0;
+    
+    // Enhanced mixing
+    virtual NonnullRefPtr<Core::ThreadedPromise<void>> set_mix_ratio(float ratio) = 0;
+    virtual NonnullRefPtr<Core::ThreadedPromise<void>> set_mix_group(u8 group_id) = 0;
+    
+    // Audio effect processing
+    virtual void set_effect_callback(AudioEffectCallback&&) = 0;
+    virtual void clear_effect_callback() = 0;
+
+protected:
+    AudioProperties m_audio_properties;
+    AudioEffectCallback m_effect_callback;
+    u8 m_mix_group { 0 };
+    float m_mix_ratio { 1.0f };
 };
 
 }
