@@ -28,11 +28,23 @@ public:
 
     virtual StringView device_name() const override { return "IntelNativeGraphicsAdapter"sv; }
 
+    // Hardware acceleration support
+    virtual ErrorOr<void> enable_hardware_acceleration() override;
+    virtual ErrorOr<void> disable_hardware_acceleration() override;
+    virtual bool is_hardware_accelerated() const override;
+
 private:
     ErrorOr<void> initialize_adapter();
+    ErrorOr<void> initialize_command_ring();
+    ErrorOr<void> initialize_contexts();
+    ErrorOr<void> initialize_engine_control();
+    ErrorOr<void> cleanup_command_ring();
+    ErrorOr<void> cleanup_contexts();
+    ErrorOr<void> cleanup_engine_control();
 
     explicit IntelNativeGraphicsAdapter(PCI::DeviceIdentifier const&);
 
     LockRefPtr<IntelDisplayConnectorGroup> m_connector_group;
+    bool m_hardware_acceleration_enabled { false };
 };
 }

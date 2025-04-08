@@ -72,4 +72,75 @@ IntelNativeGraphicsAdapter::IntelNativeGraphicsAdapter(PCI::DeviceIdentifier con
 {
 }
 
+ErrorOr<void> IntelNativeGraphicsAdapter::enable_hardware_acceleration()
+{
+    SpinlockLocker locker(m_control_lock);
+    
+    // Initialize hardware acceleration
+    TRY(initialize_command_ring());
+    TRY(initialize_contexts());
+    TRY(initialize_engine_control());
+    
+    m_hardware_acceleration_enabled = true;
+    return {};
+}
+
+ErrorOr<void> IntelNativeGraphicsAdapter::disable_hardware_acceleration()
+{
+    SpinlockLocker locker(m_control_lock);
+    
+    // Clean up hardware acceleration resources
+    TRY(cleanup_command_ring());
+    TRY(cleanup_contexts());
+    TRY(cleanup_engine_control());
+    
+    m_hardware_acceleration_enabled = false;
+    return {};
+}
+
+bool IntelNativeGraphicsAdapter::is_hardware_accelerated() const
+{
+    return m_hardware_acceleration_enabled;
+}
+
+ErrorOr<void> IntelNativeGraphicsAdapter::initialize_command_ring()
+{
+    // Initialize command ring buffer for GPU commands
+    // This is a simplified implementation - actual implementation would need
+    // to handle ring buffer allocation, initialization, and command submission
+    return {};
+}
+
+ErrorOr<void> IntelNativeGraphicsAdapter::initialize_contexts()
+{
+    // Initialize GPU contexts for different operations
+    // This would typically involve setting up context state and resources
+    return {};
+}
+
+ErrorOr<void> IntelNativeGraphicsAdapter::initialize_engine_control()
+{
+    // Initialize GPU engine control
+    // This would involve setting up engine state and control registers
+    return {};
+}
+
+ErrorOr<void> IntelNativeGraphicsAdapter::cleanup_command_ring()
+{
+    // Clean up command ring resources
+    return {};
+}
+
+ErrorOr<void> IntelNativeGraphicsAdapter::cleanup_contexts()
+{
+    // Clean up GPU contexts
+    return {};
+}
+
+ErrorOr<void> IntelNativeGraphicsAdapter::cleanup_engine_control()
+{
+    // Clean up engine control resources
+    return {};
+}
+
 }

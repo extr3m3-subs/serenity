@@ -102,6 +102,25 @@ public:
 
     Memory::Region const& framebuffer_region() const { return *m_framebuffer_region; }
 
+    // Hardware acceleration support
+    virtual ErrorOr<void> enable_hardware_acceleration() { return Error::from_errno(ENOTIMPL); }
+    virtual ErrorOr<void> disable_hardware_acceleration() { return Error::from_errno(ENOTIMPL); }
+    virtual bool is_hardware_accelerated() const { return false; }
+    
+    // Enhanced display mode support
+    virtual ErrorOr<Vector<DisplayMode>> get_supported_modes() const { return Error::from_errno(ENOTIMPL); }
+    virtual ErrorOr<void> set_display_rotation(DisplayRotation rotation) { return Error::from_errno(ENOTIMPL); }
+    virtual DisplayRotation get_display_rotation() const { return DisplayRotation::Normal; }
+    
+    // Multiple display support
+    virtual ErrorOr<void> enable_display(u8 display_index) { return Error::from_errno(ENOTIMPL); }
+    virtual ErrorOr<void> disable_display(u8 display_index) { return Error::from_errno(ENOTIMPL); }
+    virtual ErrorOr<u8> get_active_display_count() const { return Error::from_errno(ENOTIMPL); }
+    
+    // Enhanced framebuffer management
+    virtual ErrorOr<void> set_framebuffer_mode(FramebufferMode mode) { return Error::from_errno(ENOTIMPL); }
+    virtual ErrorOr<void> set_framebuffer_format(PixelFormat format) { return Error::from_errno(ENOTIMPL); }
+
 protected:
     void set_edid_bytes(Array<u8, 128> const& edid_bytes, bool might_be_invalid = false);
 
@@ -129,6 +148,12 @@ protected:
     bool m_edid_valid { false };
 
     u8* framebuffer_data() { return m_framebuffer_data; }
+
+    // New protected members
+    bool m_hardware_acceleration_enabled { false };
+    DisplayRotation m_display_rotation { DisplayRotation::Normal };
+    FramebufferMode m_framebuffer_mode { FramebufferMode::Linear };
+    PixelFormat m_pixel_format { PixelFormat::BGRx8888 };
 
 private:
     // ^File
